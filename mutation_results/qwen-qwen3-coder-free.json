@@ -1,0 +1,9 @@
+{
+  "llm_name": "qwen-qwen3-coder-free",
+  "spec_path": "../specs/pandas_concat.json",
+  "test_file": "generated_tests/pandas_concat/qwen-qwen3-coder-free.py",
+  "killed": 3,
+  "survived": 98,
+  "total_mutants": 101,
+  "mutation_score": 2.9702970297029703
+}

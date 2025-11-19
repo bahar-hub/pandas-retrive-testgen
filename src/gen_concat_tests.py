@@ -4,18 +4,16 @@
 gen_concat_tests.py
 Generate pytest tests for pandas.concat using multiple LLMs (Ollama local + OpenRouter).
 
-- Works with any source file (e.g., pandas_concat.json).
-- Preserves clean prompt/template + your Ollama logic.
-- Adds OpenRouter client and a provider dispatch to run multiple models.
-- Auto-normalizes OpenRouter slugs (e.g., "llama-4-scout:free" -> "meta-llama/llama-4-scout:free").
-- Better error messages for HTTP 4xx/5xx.
-- Optional one-time hardcoded OpenRouter API key (for local use).
+- Works with any source file (e.g., pandas_concat.json or a raw .py file).
+- If the source is a JSON spec (from fetch.py), it extracts body_stripped and uses
+  signature/docs to enrich the prompt.
+- Supports both Ollama and OpenRouter providers.
 
 Usage example:
     python gen_concat_tests.py \
       --src pandas_concat.json \
-      --out-pattern "outputs/{model}.py" \
-      --models "llama-4-scout:free,mistral-7b-instruct:free,gemma-3-12b-it:free,qwen3-14b:free,claude-sonnet-4,grok-4,gemini-2.5-pro" \
+      --out-pattern "generated/{model}.py" \
+      --models "llama-4-scout:free,mistral-7b-instruct:free,gemma-3-12b-it:free,qwen3-14b:free,claude-sonnet-4,gemini-2.5-pro" \
       --default-provider openrouter
 """
 
@@ -32,6 +30,7 @@ from pathlib import Path
 from typing import Iterator, Optional, Sequence, Tuple
 
 import requests
+import pandas as pd 
 
 # ============================== Config & Templates ==============================
 
@@ -50,14 +49,23 @@ ENV_OPENROUTER_API_KEY = "OPENROUTER_API_KEY"
 DEFAULT_OPENROUTER_TIMEOUT = 600
 
 # Optional: hardcode your OpenRouter API key here for local use.
-# If set, this takes precedence over environment variable and CLI flag.
 HARDCODED_OPENROUTER_API_KEY: Optional[str] = None  # e.g., "sk-or-xxxxxxxxxxxxxxxx"
 
 PROMPT_TEMPLATE = """You are a precise code generator and a senior Python test engineer.
 Output ONLY valid Python code (no explanations, no markdown fences).
 
+Target environment:
+- Python: {python_version}
+- pandas: {pandas_version}
+
 Task:
 Given the exact source of the function `pandas.concat` (below), write a comprehensive `pytest` test file named "{outfile}" that validates its behavior across edge cases.
+
+Important constraints:
+- All tests MUST pass on the given pandas version in a standard environment.
+- Do NOT rely on undocumented internal behavior or private APIs.
+- Do NOT use keyword arguments that do not appear in the provided function signature.
+- Use only stable, documented behavior that is compatible with pandas {pandas_version}.
 
 Requirements:
 - Use `pytest` and `pandas` (and `numpy` if needed).
@@ -70,6 +78,12 @@ Requirements:
   boolean/object/numeric mixes, and handling of copy vs. views if observable.
 - Prefer multiple small focused tests, clear names `test_*`.
 - Keep the file self-contained: include necessary imports only.
+
+Function signature (for reference):
+{signature_block}
+
+Selected examples from the official docs/spec (if any):
+{examples_block}
 
 Function source of `pandas.concat`:
 <<<BEGIN_SOURCE
@@ -100,17 +114,68 @@ def sanitize_filename_piece(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "-", s)
 
 
+def load_source_and_spec(src: Path) -> Tuple[str, Optional[dict]]:
+
+    text = read_text(src)
+    if src.suffix.lower() == ".json":
+        spec = json.loads(text)
+        body = spec.get("body_stripped", "")
+        if not body:
+            raise RuntimeError("JSON spec has no 'body_stripped' field.")
+        return body, spec
+    else:
+        return text, None
+
+
+def build_prompt(func_source: str, outfile: str, spec: Optional[dict]) -> str:
+
+    python_version = ".".join(map(str, sys.version_info[:3]))
+    if spec is not None:
+        pandas_version = spec.get("version", pd.__version__)
+        signature = spec.get("signature", "")
+        examples = spec.get("examples_code") or []
+    else:
+        pandas_version = pd.__version__
+        signature = ""
+        examples = []
+
+    if signature:
+        signature_block = signature
+    else:
+        signature_block = "(signature not provided in spec)"
+
+    if examples:
+        max_examples = 3
+        selected = examples[:max_examples]
+        examples_block = "\n\n".join(
+            f"Example {i+1}:\n{code}" for i, code in enumerate(selected)
+        )
+    else:
+        examples_block = "(no examples provided in spec)"
+
+    return PROMPT_TEMPLATE.format(
+        func_source=func_source,
+        outfile=outfile,
+        python_version=python_version,
+        pandas_version=pandas_version,
+        signature_block=signature_block,
+        examples_block=examples_block,
+    )
+
 # For OpenRouter model aliases (org/model slugs).
 OPENROUTER_MODEL_ALIASES = {
-    # Free/community endpoints:
-    "llama-4-scout:free": "meta-llama/llama-4-scout:free",
+    "deepseek-r1t2-chimera:free": "tngtech/deepseek-r1t2-chimera:free",
+
+    "qwen3-coder:free": "qwen/qwen3-coder:free",
+
+
+    "gemma-3-4b-it:free": "google/gemma-3-4b-it:free",        
+
+    "llama-3.3-70b-instruct:free": "meta-llama/llama-3.3-70b-instruct:free",
+    
+    "sherlock-dash-alpha": "openrouter/sherlock-dash-alpha",
+
     "mistral-7b-instruct:free": "mistralai/mistral-7b-instruct:free",
-    "gemma-3-12b-it:free": "google/gemma-3-12b-it:free",
-    "qwen3-14b:free": "qwen/qwen3-14b:free",
-    # Paid/standard slugs (depending on your plan/route):
-    "claude-sonnet-4": "anthropic/claude-sonnet-4",
-    "grok-4": "xai/grok-4",
-    "gemini-2.5-pro": "google/gemini-2.5-pro",
 }
 
 def normalize_openrouter_model(model: str) -> str:
@@ -123,7 +188,7 @@ def normalize_openrouter_model(model: str) -> str:
     return OPENROUTER_MODEL_ALIASES.get(model, model)
 
 
-# ============================== Ollama Client (your original, kept) ==============================
+# ============================== Ollama Client ==============================
 
 @dataclass
 class OllamaOptions:
@@ -277,12 +342,11 @@ class OpenRouterClient:
             try:
                 r = self.session.post(self.opts.base_url, headers=headers, json=payload, timeout=self.opts.timeout)
                 if r.status_code >= 400:
-                    # Try to surface the server error text
                     try:
                         details = r.json()
                     except Exception:
                         details = {"error_text": r.text}
-                    r.raise_for_status()  # raises HTTPError
+                    r.raise_for_status()
                 data = r.json()
                 choices = data.get("choices", [])
                 if not choices:
@@ -291,7 +355,10 @@ class OpenRouterClient:
                 if isinstance(content, str):
                     text = content
                 elif isinstance(content, list):
-                    text = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in content)
+                    text = "".join(
+                        part.get("text", "") if isinstance(part, dict) else str(part)
+                        for part in content
+                    )
                 else:
                     text = str(content)
                 if text.strip():
@@ -318,15 +385,6 @@ class OpenRouterClient:
 
 # ============================== App Logic ==============================
 
-def build_prompt(func_source: str, outfile: str) -> str:
-    return PROMPT_TEMPLATE.format(func_source=func_source, outfile=outfile)
-
-
-def save_text(out_path: Path, text: str) -> None:
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(text, encoding="utf-8")
-
-
 def parse_models_arg(models_str: str, default_provider: str) -> list[Tuple[str, str]]:
     """
     Returns list of (provider, model).
@@ -335,7 +393,6 @@ def parse_models_arg(models_str: str, default_provider: str) -> list[Tuple[str, 
       - If an item starts with a known provider prefix ("openrouter:" or "ollama:"),
         split at the first colon and treat that as the provider.
       - Otherwise, treat the whole item as a MODEL and use default_provider.
-        This lets e.g. "llama-4-scout:free" work when --default-provider=openrouter.
     """
     known_prefixes = ("openrouter:", "ollama:")
     items: list[tuple[str, str]] = []
@@ -344,7 +401,7 @@ def parse_models_arg(models_str: str, default_provider: str) -> list[Tuple[str, 
         if lower.startswith(known_prefixes):
             first_colon = raw.find(":")
             provider = raw[:first_colon].strip().lower()
-            model = raw[first_colon + 1:].strip()
+            model = raw[first_colon + 1 :].strip()
             items.append((provider, model))
         else:
             items.append((default_provider.lower(), raw))
@@ -361,7 +418,6 @@ def run_one(
 ) -> str:
     if provider == "ollama":
         client = OllamaClient(OllamaOptions(**{**ollama_opts.__dict__, "model": model}))
-        # Best-effort warn if not pulled
         try:
             if not client.model_available(model):
                 print(
@@ -390,14 +446,14 @@ def run_many(
     ollama_opts: OllamaOptions,
     openrouter_opts: OpenRouterOptions,
 ) -> int:
-    func_source = read_text(src)
+    func_source, spec = load_source_and_spec(src)
 
     for provider, model in models:
         safe_provider = sanitize_filename_piece(provider)
         safe_model = sanitize_filename_piece(model)
         out_path = Path(out_pattern.format(provider=safe_provider, model=safe_model))
 
-        prompt = build_prompt(func_source, out_path.name)
+        prompt = build_prompt(func_source, out_path.name, spec)
         if print_prompt:
             print(f"\n==== Prompt for {provider}:{model} (outfile {out_path.name}) ====\n")
             print(prompt)
@@ -416,7 +472,8 @@ def run_many(
             if not code:
                 print(f"[ERROR] Empty code from {provider}:{model}", file=sys.stderr)
                 continue
-            save_text(out_path, code)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(code, encoding="utf-8")
             print(f"[OK] Wrote: {out_path.resolve()}")
         except Exception as e:
             print(f"[FAIL] {provider}:{model} -> {e}", file=sys.stderr)
@@ -430,11 +487,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Generate pytest tests for pandas.concat using multiple LLMs (Ollama + OpenRouter)."
     )
-    p.add_argument("--src", default="concat_full_source.py", help="Path to saved function body (can be .py/.json)")
+    p.add_argument(
+        "--src",
+        default="pandas_concat.json",
+        help="Path to saved function body or JSON spec (e.g. pandas_concat.json).",
+    )
     p.add_argument(
         "--out-pattern",
-        default="outputs/{provider}_{model}.py",
-        help="Output pattern, supports {provider} and {model}. Example: outputs/{provider}_{model}.py",
+        default="generated/{model}.py",
+        help="Output pattern, supports {provider} and {model}. Example: generated/{model}.py",
     )
     p.add_argument(
         "--models",
@@ -465,8 +526,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--backoff", type=float, default=DEFAULT_BACKOFF, help="Backoff base seconds (both providers)")
     p.add_argument("--num-ctx", type=int, default=DEFAULT_NUM_CTX, help="Ollama num_ctx")
     p.add_argument(
-        "--no-stream", dest="stream", action="store_false",
-        help="Disable streaming for Ollama; OpenRouter uses non-stream in this script."
+        "--no-stream",
+        dest="stream",
+        action="store_false",
+        help="Disable streaming for Ollama; OpenRouter uses non-stream in this script.",
     )
     p.set_defaults(stream=True)
 
@@ -484,13 +547,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
-    # Parse model list
     models = parse_models_arg(args.models, default_provider=args.default_provider)
 
-    # Prepare provider option objects
     ollama_opts = OllamaOptions(
         host=args.host,
-        model="unused-here",  # overridden per-model
+        model="unused-here",
         temperature=args.temperature,
         timeout=args.timeout,
         health_timeout=args.health_timeout,
@@ -501,8 +562,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     openrouter_opts = OpenRouterOptions(
         base_url=args.openrouter_base_url,
-        api_key=args.openrouter_api_key,  # may be None; client will fallback to hardcoded/env
-        model="unused-here",  # overridden per-model
+        api_key=args.openrouter_api_key,
+        model="unused-here",
         temperature=args.temperature,
         timeout=args.openrouter_timeout,
         retries=args.retries,

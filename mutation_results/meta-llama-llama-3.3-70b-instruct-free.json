@@ -1,0 +1,9 @@
+{
+  "llm_name": "meta-llama-llama-3.3-70b-instruct-free",
+  "spec_path": "../specs/pandas_concat.json",
+  "test_file": "generated_tests/pandas_concat/meta-llama-llama-3.3-70b-instruct-free.py",
+  "killed": 0,
+  "survived": 101,
+  "total_mutants": 101,
+  "mutation_score": 0.0
+}
