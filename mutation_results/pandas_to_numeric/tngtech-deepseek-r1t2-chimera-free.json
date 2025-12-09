@@ -1,0 +1,10 @@
+{
+  "llm_name": "tngtech-deepseek-r1t2-chimera-free",
+  "spec_path": "../specs/pandas_to_numeric.json",
+  "test_file": "generated_tests/pandas_to_numeric/tngtech-deepseek-r1t2-chimera-free.py",
+  "target_qualified_name": "pandas.to_numeric",
+  "killed": 49,
+  "survived": 0,
+  "total_mutants": 49,
+  "mutation_score": 100.0
+}

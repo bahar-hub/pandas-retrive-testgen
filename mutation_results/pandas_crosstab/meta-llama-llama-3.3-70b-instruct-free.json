@@ -1,0 +1,10 @@
+{
+  "llm_name": "meta-llama-llama-3.3-70b-instruct-free",
+  "spec_path": "../specs/pandas_crosstab.json",
+  "test_file": "generated_tests/pandas_crosstab/meta-llama-llama-3.3-70b-instruct-free.py",
+  "target_qualified_name": "pandas.crosstab",
+  "killed": 39,
+  "survived": 0,
+  "total_mutants": 39,
+  "mutation_score": 100.0
+}

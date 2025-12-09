@@ -2,8 +2,8 @@
   "llm_name": "google-gemma-3-4b-it-free",
   "spec_path": "../specs/pandas_concat.json",
   "test_file": "generated_tests/pandas_concat/google-gemma-3-4b-it-free.py",
-  "killed": 1,
-  "survived": 100,
+  "killed": 101,
+  "survived": 0,
   "total_mutants": 101,
-  "mutation_score": 0.9900990099009901
+  "mutation_score": 100.0
 }

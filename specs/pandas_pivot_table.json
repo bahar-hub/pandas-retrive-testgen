@@ -1,0 +1,153 @@
+{
+  "package": "pandas",
+  "version": "2.3.3",
+  "qualified_name": "pandas.core.reshape.pivot.pivot_table",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_pandas_0hnh4gc8/pandas-2.3.3/pandas/core/reshape/pivot.py",
+  "signature": "(data: DataFrame, values = None, index = None, columns = None, aggfunc: AggFuncType = 'mean', fill_value = None, margins: bool = False, dropna: bool = True, margins_name: Hashable = 'All', observed: bool | lib.NoDefault = lib.no_default, sort: bool = True) -> DataFrame",
+  "parameters": [
+    {
+      "name": "data",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "DataFrame",
+      "default": null,
+      "required": true,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "values",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "index",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "columns",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "aggfunc",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "AggFuncType",
+      "default": "'mean'",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "fill_value",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "margins",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "False",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "dropna",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "True",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "margins_name",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "Hashable",
+      "default": "'All'",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "observed",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool | lib.NoDefault",
+      "default": "lib.no_default",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "sort",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "True",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    }
+  ],
+  "returns": {
+    "type": "DataFrame",
+    "description": null
+  },
+  "raises": null,
+  "notes": null,
+  "examples_code": null,
+  "module_imports": [
+    "from __future__ import annotations",
+    "from collections.abc import (",
+    "from typing import (",
+    "import warnings",
+    "import numpy as np",
+    "from pandas._libs import lib",
+    "from pandas.util._decorators import (",
+    "from pandas.util._exceptions import find_stack_level",
+    "from pandas.core.dtypes.cast import maybe_downcast_to_dtype",
+    "from pandas.core.dtypes.common import (",
+    "from pandas.core.dtypes.dtypes import ExtensionDtype",
+    "from pandas.core.dtypes.generic import (",
+    "import pandas.core.common as com",
+    "from pandas.core.frame import _shared_docs",
+    "from pandas.core.groupby import Grouper",
+    "from pandas.core.indexes.api import (",
+    "from pandas.core.reshape.concat import concat",
+    "from pandas.core.reshape.util import cartesian_product",
+    "from pandas.core.series import Series",
+    "    from pandas._typing import (",
+    "    from pandas import DataFrame",
+    "    from pandas import DataFrame",
+    "            from pandas import DataFrame",
+    "    from pandas import DataFrame"
+  ],
+  "body_stripped": "def pivot_table(\n    data: DataFrame,\n    values=None,\n    index=None,\n    columns=None,\n    aggfunc: AggFuncType = \"mean\",\n    fill_value=None,\n    margins: bool = False,\n    dropna: bool = True,\n    margins_name: Hashable = \"All\",\n    observed: bool | lib.NoDefault = lib.no_default,\n    sort: bool = True,\n) -> DataFrame:\n    index = _convert_by(index)\n    columns = _convert_by(columns)\n\n    if isinstance(aggfunc, list):\n        pieces: list[DataFrame] = []\n        keys = []\n        for func in aggfunc:\n            _table = __internal_pivot_table(\n                data,\n                values=values,\n                index=index,\n                columns=columns,\n                fill_value=fill_value,\n                aggfunc=func,\n                margins=margins,\n                dropna=dropna,\n                margins_name=margins_name,\n                observed=observed,\n                sort=sort,\n            )\n            pieces.append(_table)\n            keys.append(getattr(func, \"__name__\", func))\n\n        table = concat(pieces, keys=keys, axis=1)\n        return table.__finalize__(data, method=\"pivot_table\")\n\n    table = __internal_pivot_table(\n        data,\n        values,\n        index,\n        columns,\n        aggfunc,\n        fill_value,\n        margins,\n        dropna,\n        margins_name,\n        observed,\n        sort,\n    )\n    return table.__finalize__(data, method=\"pivot_table\")\n"
+}

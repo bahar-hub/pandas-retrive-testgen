@@ -1,0 +1,10 @@
+{
+  "llm_name": "google-gemma-3-4b-it-free",
+  "spec_path": "../specs/pandas_eval.json",
+  "test_file": "generated_tests/pandas_eval/google-gemma-3-4b-it-free.py",
+  "target_qualified_name": "pandas.eval",
+  "killed": 50,
+  "survived": 0,
+  "total_mutants": 50,
+  "mutation_score": 100.0
+}

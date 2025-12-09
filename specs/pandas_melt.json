@@ -1,0 +1,106 @@
+{
+  "package": "pandas",
+  "version": "2.3.3",
+  "qualified_name": "pandas.core.reshape.melt.melt",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_pandas_uubvllzw/pandas-2.3.3/pandas/core/reshape/melt.py",
+  "signature": "(frame: DataFrame, id_vars = None, value_vars = None, var_name = None, value_name: Hashable = 'value', col_level = None, ignore_index: bool = True) -> DataFrame",
+  "parameters": [
+    {
+      "name": "frame",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "DataFrame",
+      "default": null,
+      "required": true,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "id_vars",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "value_vars",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "var_name",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "value_name",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "Hashable",
+      "default": "'value'",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "col_level",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": "None",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "ignore_index",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "True",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    }
+  ],
+  "returns": {
+    "type": "DataFrame",
+    "description": null
+  },
+  "raises": null,
+  "notes": null,
+  "examples_code": null,
+  "module_imports": [
+    "from __future__ import annotations",
+    "import re",
+    "from typing import TYPE_CHECKING",
+    "import numpy as np",
+    "from pandas.util._decorators import Appender",
+    "from pandas.core.dtypes.common import is_list_like",
+    "from pandas.core.dtypes.concat import concat_compat",
+    "from pandas.core.dtypes.missing import notna",
+    "import pandas.core.algorithms as algos",
+    "from pandas.core.indexes.api import MultiIndex",
+    "from pandas.core.reshape.concat import concat",
+    "from pandas.core.reshape.util import tile_compat",
+    "from pandas.core.shared_docs import _shared_docs",
+    "from pandas.core.tools.numeric import to_numeric",
+    "    from collections.abc import Hashable",
+    "    from pandas._typing import AnyArrayLike",
+    "    from pandas import DataFrame"
+  ],
+  "body_stripped": "def melt(\n    frame: DataFrame,\n    id_vars=None,\n    value_vars=None,\n    var_name=None,\n    value_name: Hashable = \"value\",\n    col_level=None,\n    ignore_index: bool = True,\n) -> DataFrame:\n    if value_name in frame.columns:\n        raise ValueError(\n            f\"value_name ({value_name}) cannot match an element in \"\n            \"the DataFrame columns.\"\n        )\n    id_vars = ensure_list_vars(id_vars, \"id_vars\", frame.columns)\n    value_vars_was_not_none = value_vars is not None\n    value_vars = ensure_list_vars(value_vars, \"value_vars\", frame.columns)\n\n    if id_vars or value_vars:\n        if col_level is not None:\n            level = frame.columns.get_level_values(col_level)\n        else:\n            level = frame.columns\n        labels = id_vars + value_vars\n        idx = level.get_indexer_for(labels)\n        missing = idx == -1\n        if missing.any():\n            missing_labels = [\n                lab for lab, not_found in zip(labels, missing) if not_found\n            ]\n            raise KeyError(\n                \"The following id_vars or value_vars are not present in \"\n                f\"the DataFrame: {missing_labels}\"\n            )\n        if value_vars_was_not_none:\n            frame = frame.iloc[:, algos.unique(idx)]\n        else:\n            frame = frame.copy()\n    else:\n        frame = frame.copy()\n\n    if col_level is not None:  # allow list or other?\n        # frame is a copy\n        frame.columns = frame.columns.get_level_values(col_level)\n\n    if var_name is None:\n        if isinstance(frame.columns, MultiIndex):\n            if len(frame.columns.names) == len(set(frame.columns.names)):\n                var_name = frame.columns.names\n            else:\n                var_name = [f\"variable_{i}\" for i in range(len(frame.columns.names))]\n        else:\n            var_name = [\n                frame.columns.name if frame.columns.name is not None else \"variable\"\n            ]\n    elif is_list_like(var_name):\n        raise ValueError(f\"{var_name=} must be a scalar.\")\n    else:\n        var_name = [var_name]\n\n    num_rows, K = frame.shape\n    num_cols_adjusted = K - len(id_vars)\n\n    mdata: dict[Hashable, AnyArrayLike] = {}\n    for col in id_vars:\n        id_data = frame.pop(col)\n        if not isinstance(id_data.dtype, np.dtype):\n            # i.e. ExtensionDtype\n            if num_cols_adjusted > 0:\n                mdata[col] = concat([id_data] * num_cols_adjusted, ignore_index=True)\n            else:\n                # We can't concat empty list. (GH 46044)\n                mdata[col] = type(id_data)([], name=id_data.name, dtype=id_data.dtype)\n        else:\n            mdata[col] = np.tile(id_data._values, num_cols_adjusted)\n\n    mcolumns = id_vars + var_name + [value_name]\n\n    if frame.shape[1] > 0 and not any(\n        not isinstance(dt, np.dtype) and dt._supports_2d for dt in frame.dtypes\n    ):\n        mdata[value_name] = concat(\n            [frame.iloc[:, i] for i in range(frame.shape[1])]\n        ).values\n    else:\n        mdata[value_name] = frame._values.ravel(\"F\")\n    for i, col in enumerate(var_name):\n        mdata[col] = frame.columns._get_level_values(i).repeat(num_rows)\n\n    result = frame._constructor(mdata, columns=mcolumns)\n\n    if not ignore_index:\n        result.index = tile_compat(frame.index, num_cols_adjusted)\n\n    return result\n"
+}

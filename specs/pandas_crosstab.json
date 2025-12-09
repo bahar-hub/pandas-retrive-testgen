@@ -1,0 +1,160 @@
+{
+  "package": "pandas",
+  "version": "2.3.3",
+  "qualified_name": "pandas.core.reshape.pivot.crosstab",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_pandas_2jdh827n/pandas-2.3.3/pandas/core/reshape/pivot.py",
+  "signature": "(index, columns, values = None, rownames = None, colnames = None, aggfunc = None, margins: bool = False, margins_name: Hashable = 'All', dropna: bool = True, normalize: bool | Literal[0, 1, 'all', 'index', 'columns'] = False) -> DataFrame",
+  "parameters": [
+    {
+      "name": "index",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "array-like, Series, or list of arrays/Series",
+      "default": null,
+      "required": true,
+      "nullable": false,
+      "enum": null,
+      "description": "Values to group by in the rows."
+    },
+    {
+      "name": "columns",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "array-like, Series, or list of arrays/Series",
+      "default": null,
+      "required": true,
+      "nullable": false,
+      "enum": null,
+      "description": "Values to group by in the columns."
+    },
+    {
+      "name": "values",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "array-like, optional",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Array of values to aggregate according to the factors. Requires `aggfunc` be specified."
+    },
+    {
+      "name": "rownames",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "sequence",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "If passed, must match number of row arrays passed."
+    },
+    {
+      "name": "colnames",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "sequence",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "If passed, must match number of column arrays passed."
+    },
+    {
+      "name": "aggfunc",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "function, optional",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "If specified, requires `values` be specified as well."
+    },
+    {
+      "name": "margins",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "False",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Add row/column margins (subtotals)."
+    },
+    {
+      "name": "margins_name",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "Hashable",
+      "default": "'All'",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Name of the row/column that will contain the totals when margins is True."
+    },
+    {
+      "name": "dropna",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "True",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Do not include columns whose entries are all NaN."
+    },
+    {
+      "name": "normalize",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool | Literal[0, 1, 'all', 'index', 'columns']",
+      "default": "False",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "all",
+        "index",
+        "columns"
+      ],
+      "description": "Normalize by dividing all values by the sum of values."
+    }
+  ],
+  "returns": {
+    "type": "DataFrame",
+    "description": "DataFrame\n    Cross tabulation of the data.\n\nSee Also\n--------\nDataFrame.pivot : Reshape data based on column values.\npivot_table : Create a pivot table as a DataFrame."
+  },
+  "raises": null,
+  "notes": [
+    "Any Series passed will have their name attributes used unless row or column",
+    "names for the cross-tabulation are specified.",
+    "Any input passed containing Categorical data will have **all** of its",
+    "categories included in the cross-tabulation, even if the actual data does",
+    "not contain any instances of a particular category.",
+    "In the event that there aren't overlapping indexes an empty DataFrame will",
+    "be returned.",
+    "Reference :ref:`the user guide <reshaping.crosstabulations>` for more examples."
+  ],
+  "examples_code": [
+    "a = np.array([\"foo\", \"foo\", \"foo\", \"foo\", \"bar\", \"bar\",\n              \"bar\", \"bar\", \"foo\", \"foo\", \"foo\"], dtype=object)\nb = np.array([\"one\", \"one\", \"one\", \"two\", \"one\", \"one\",\n              \"one\", \"two\", \"two\", \"two\", \"one\"], dtype=object)\nc = np.array([\"dull\", \"dull\", \"shiny\", \"dull\", \"dull\", \"shiny\",\n              \"shiny\", \"dull\", \"shiny\", \"shiny\", \"shiny\"],\n             dtype=object)\npd.crosstab(a, [b, c], rownames=['a'], colnames=['b', 'c'])",
+    "foo = pd.Categorical(['a', 'b'], categories=['a', 'b', 'c'])\nbar = pd.Categorical(['d', 'e'], categories=['d', 'e', 'f'])\npd.crosstab(foo, bar)",
+    "pd.crosstab(foo, bar, dropna=False)"
+  ],
+  "module_imports": [
+    "from __future__ import annotations",
+    "from collections.abc import (",
+    "from typing import (",
+    "import warnings",
+    "import numpy as np",
+    "from pandas._libs import lib",
+    "from pandas.util._decorators import (",
+    "from pandas.util._exceptions import find_stack_level",
+    "from pandas.core.dtypes.cast import maybe_downcast_to_dtype",
+    "from pandas.core.dtypes.common import (",
+    "from pandas.core.dtypes.dtypes import ExtensionDtype",
+    "from pandas.core.dtypes.generic import (",
+    "import pandas.core.common as com",
+    "from pandas.core.frame import _shared_docs",
+    "from pandas.core.groupby import Grouper",
+    "from pandas.core.indexes.api import (",
+    "from pandas.core.reshape.concat import concat",
+    "from pandas.core.reshape.util import cartesian_product",
+    "from pandas.core.series import Series",
+    "    from pandas._typing import (",
+    "    from pandas import DataFrame",
+    "    from pandas import DataFrame",
+    "            from pandas import DataFrame",
+    "    from pandas import DataFrame"
+  ],
+  "body_stripped": "def crosstab(\n    index,\n    columns,\n    values=None,\n    rownames=None,\n    colnames=None,\n    aggfunc=None,\n    margins: bool = False,\n    margins_name: Hashable = \"All\",\n    dropna: bool = True,\n    normalize: bool | Literal[0, 1, \"all\", \"index\", \"columns\"] = False,\n) -> DataFrame:\n    \"\"\"\n    Compute a simple cross tabulation of two (or more) factors.\n\n    By default, computes a frequency table of the factors unless an\n    array of values and an aggregation function are passed.\n\n    Parameters\n    ----------\n    index : array-like, Series, or list of arrays/Series\n        Values to group by in the rows.\n    columns : array-like, Series, or list of arrays/Series\n        Values to group by in the columns.\n    values : array-like, optional\n        Array of values to aggregate according to the factors.\n        Requires `aggfunc` be specified.\n    rownames : sequence, default None\n        If passed, must match number of row arrays passed.\n    colnames : sequence, default None\n        If passed, must match number of column arrays passed.\n    aggfunc : function, optional\n        If specified, requires `values` be specified as well.\n    margins : bool, default False\n        Add row/column margins (subtotals).\n    margins_name : str, default 'All'\n        Name of the row/column that will contain the totals\n        when margins is True.\n    dropna : bool, default True\n        Do not include columns whose entries are all NaN.\n    normalize : bool, {'all', 'index', 'columns'}, or {0,1}, default False\n        Normalize by dividing all values by the sum of values.\n\n        - If passed 'all' or `True`, will normalize over all values.\n        - If passed 'index' will normalize over each row.\n        - If passed 'columns' will normalize over each column.\n        - If margins is `True`, will also normalize margin values.\n\n    Returns\n    -------\n    DataFrame\n        Cross tabulation of the data.\n\n    See Also\n    --------\n    DataFrame.pivot : Reshape data based on column values.\n    pivot_table : Create a pivot table as a DataFrame.\n\n    Notes\n    -----\n    Any Series passed will have their name attributes used unless row or column\n    names for the cross-tabulation are specified.\n\n    Any input passed containing Categorical data will have **all** of its\n    categories included in the cross-tabulation, even if the actual data does\n    not contain any instances of a particular category.\n\n    In the event that there aren't overlapping indexes an empty DataFrame will\n    be returned.\n\n    Reference :ref:`the user guide <reshaping.crosstabulations>` for more examples.\n\n    Examples\n    --------\n    >>> a = np.array([\"foo\", \"foo\", \"foo\", \"foo\", \"bar\", \"bar\",\n    ...               \"bar\", \"bar\", \"foo\", \"foo\", \"foo\"], dtype=object)\n    >>> b = np.array([\"one\", \"one\", \"one\", \"two\", \"one\", \"one\",\n    ...               \"one\", \"two\", \"two\", \"two\", \"one\"], dtype=object)\n    >>> c = np.array([\"dull\", \"dull\", \"shiny\", \"dull\", \"dull\", \"shiny\",\n    ...               \"shiny\", \"dull\", \"shiny\", \"shiny\", \"shiny\"],\n    ...              dtype=object)\n    >>> pd.crosstab(a, [b, c], rownames=['a'], colnames=['b', 'c'])\n    b   one        two\n    c   dull shiny dull shiny\n    a\n    bar    1     2    1     0\n    foo    2     2    1     2\n\n    Here 'c' and 'f' are not represented in the data and will not be\n    shown in the output because dropna is True by default. Set\n    dropna=False to preserve categories with no data.\n\n    >>> foo = pd.Categorical(['a', 'b'], categories=['a', 'b', 'c'])\n    >>> bar = pd.Categorical(['d', 'e'], categories=['d', 'e', 'f'])\n    >>> pd.crosstab(foo, bar)\n    col_0  d  e\n    row_0\n    a      1  0\n    b      0  1\n    >>> pd.crosstab(foo, bar, dropna=False)\n    col_0  d  e  f\n    row_0\n    a      1  0  0\n    b      0  1  0\n    c      0  0  0\n    \"\"\"\n    if values is None and aggfunc is not None:\n        raise ValueError(\"aggfunc cannot be used without values.\")\n\n    if values is not None and aggfunc is None:\n        raise ValueError(\"values cannot be used without an aggfunc.\")\n\n    if not is_nested_list_like(index):\n        index = [index]\n    if not is_nested_list_like(columns):\n        columns = [columns]\n\n    common_idx = None\n    pass_objs = [x for x in index + columns if isinstance(x, (ABCSeries, ABCDataFrame))]\n    if pass_objs:\n        common_idx = get_objs_combined_axis(pass_objs, intersect=True, sort=False)\n\n    rownames = _get_names(index, rownames, prefix=\"row\")\n    colnames = _get_names(columns, colnames, prefix=\"col\")\n\n    # duplicate names mapped to unique names for pivot op\n    (\n        rownames_mapper,\n        unique_rownames,\n        colnames_mapper,\n        unique_colnames,\n    ) = _build_names_mapper(rownames, colnames)\n\n    from pandas import DataFrame\n\n    data = {\n        **dict(zip(unique_rownames, index)),\n        **dict(zip(unique_colnames, columns)),\n    }\n    df = DataFrame(data, index=common_idx)\n\n    if values is None:\n        df[\"__dummy__\"] = 0\n        kwargs = {\"aggfunc\": len, \"fill_value\": 0}\n    else:\n        df[\"__dummy__\"] = values\n        kwargs = {\"aggfunc\": aggfunc}\n\n    # error: Argument 7 to \"pivot_table\" of \"DataFrame\" has incompatible type\n    # \"**Dict[str, object]\"; expected \"Union[...]\"\n    table = df.pivot_table(\n        \"__dummy__\",\n        index=unique_rownames,\n        columns=unique_colnames,\n        margins=margins,\n        margins_name=margins_name,\n        dropna=dropna,\n        observed=False,\n        **kwargs,  # type: ignore[arg-type]\n    )\n\n    # Post-process\n    if normalize is not False:\n        table = _normalize(\n            table, normalize=normalize, margins=margins, margins_name=margins_name\n        )\n\n    table = table.rename_axis(index=rownames_mapper, axis=0)\n    table = table.rename_axis(columns=colnames_mapper, axis=1)\n\n    return table\n"
+}

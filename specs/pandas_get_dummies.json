@@ -1,0 +1,133 @@
+{
+  "package": "pandas",
+  "version": "2.3.3",
+  "qualified_name": "pandas.core.reshape.encoding.get_dummies",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_pandas_9nb6q8z_/pandas-2.3.3/pandas/core/reshape/encoding.py",
+  "signature": "(data, prefix = None, prefix_sep: str | Iterable[str] | dict[str, str] = '_', dummy_na: bool = False, columns = None, sparse: bool = False, drop_first: bool = False, dtype: NpDtype | None = None) -> DataFrame",
+  "parameters": [
+    {
+      "name": "data",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "array-like, Series, or DataFrame",
+      "default": null,
+      "required": true,
+      "nullable": false,
+      "enum": null,
+      "description": "Data of which to get dummy indicators."
+    },
+    {
+      "name": "prefix",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "str, list of str, or dict of str",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "String to append DataFrame column names. Pass a list with length equal to the number of columns when calling get_dummies on a DataFrame. Alternatively, `prefix` can be a dictionary mapping column names to prefixes."
+    },
+    {
+      "name": "prefix_sep",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "str | Iterable[str] | dict[str, str]",
+      "default": "'_'",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "If appending prefix, separator/delimiter to use. Or pass a list or dictionary as with `prefix`."
+    },
+    {
+      "name": "dummy_na",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "False",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Add a column to indicate NaNs, if False NaNs are ignored."
+    },
+    {
+      "name": "columns",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "list-like",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Column names in the DataFrame to be encoded. If `columns` is None then all the columns with `object`, `string`, or `category` dtype will be converted."
+    },
+    {
+      "name": "sparse",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "False",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Whether the dummy-encoded columns should be backed by"
+    },
+    {
+      "name": "drop_first",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "False",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Whether to get k-1 dummies out of k categorical levels by removing the first level."
+    },
+    {
+      "name": "dtype",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "NpDtype | None",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "Data type for new columns. Only a single dtype is allowed."
+    }
+  ],
+  "returns": {
+    "type": "DataFrame",
+    "description": "DataFrame\n    Dummy-coded data. If `data` contains other columns than the\n    dummy-coded one(s), these will be prepended, unaltered, to the result.\n\nSee Also\n--------\nSeries.str.get_dummies : Convert Series of strings to dummy codes.\n:func:`~pandas.from_dummies` : Convert dummy codes to categorical ``DataFrame``."
+  },
+  "raises": null,
+  "notes": [
+    "Reference :ref:`the user guide <reshaping.dummies>` for more examples."
+  ],
+  "examples_code": [
+    "s = pd.Series(list('abca'))",
+    "pd.get_dummies(s)",
+    "s1 = ['a', 'b', np.nan]",
+    "pd.get_dummies(s1)",
+    "pd.get_dummies(s1, dummy_na=True)",
+    "df = pd.DataFrame({'A': ['a', 'b', 'a'], 'B': ['b', 'a', 'c'],\n                   'C': [1, 2, 3]})",
+    "pd.get_dummies(df, prefix=['col1', 'col2'])",
+    "pd.get_dummies(pd.Series(list('abcaa')))",
+    "pd.get_dummies(pd.Series(list('abcaa')), drop_first=True)",
+    "pd.get_dummies(pd.Series(list('abc')), dtype=float)"
+  ],
+  "module_imports": [
+    "from __future__ import annotations",
+    "from collections import defaultdict",
+    "from collections.abc import (",
+    "import itertools",
+    "from typing import (",
+    "import numpy as np",
+    "from pandas._libs import missing as libmissing",
+    "from pandas._libs.sparse import IntIndex",
+    "from pandas.core.dtypes.common import (",
+    "from pandas.core.dtypes.dtypes import (",
+    "from pandas.core.arrays import SparseArray",
+    "from pandas.core.arrays.categorical import factorize_from_iterable",
+    "from pandas.core.arrays.string_ import StringDtype",
+    "from pandas.core.frame import DataFrame",
+    "from pandas.core.indexes.api import (",
+    "from pandas.core.series import Series",
+    "    from pandas._typing import NpDtype",
+    "    from pandas.core.reshape.concat import concat",
+    "    from pandas.core.reshape.concat import concat",
+    "            import pyarrow as pa",
+    "    from pandas.core.reshape.concat import concat"
+  ],
+  "body_stripped": "def get_dummies(\n    data,\n    prefix=None,\n    prefix_sep: str | Iterable[str] | dict[str, str] = \"_\",\n    dummy_na: bool = False,\n    columns=None,\n    sparse: bool = False,\n    drop_first: bool = False,\n    dtype: NpDtype | None = None,\n) -> DataFrame:\n    \"\"\"\n    Convert categorical variable into dummy/indicator variables.\n\n    Each variable is converted in as many 0/1 variables as there are different\n    values. Columns in the output are each named after a value; if the input is\n    a DataFrame, the name of the original variable is prepended to the value.\n\n    Parameters\n    ----------\n    data : array-like, Series, or DataFrame\n        Data of which to get dummy indicators.\n    prefix : str, list of str, or dict of str, default None\n        String to append DataFrame column names.\n        Pass a list with length equal to the number of columns\n        when calling get_dummies on a DataFrame. Alternatively, `prefix`\n        can be a dictionary mapping column names to prefixes.\n    prefix_sep : str, default '_'\n        If appending prefix, separator/delimiter to use. Or pass a\n        list or dictionary as with `prefix`.\n    dummy_na : bool, default False\n        Add a column to indicate NaNs, if False NaNs are ignored.\n    columns : list-like, default None\n        Column names in the DataFrame to be encoded.\n        If `columns` is None then all the columns with\n        `object`, `string`, or `category` dtype will be converted.\n    sparse : bool, default False\n        Whether the dummy-encoded columns should be backed by\n        a :class:`SparseArray` (True) or a regular NumPy array (False).\n    drop_first : bool, default False\n        Whether to get k-1 dummies out of k categorical levels by removing the\n        first level.\n    dtype : dtype, default bool\n        Data type for new columns. Only a single dtype is allowed.\n\n    Returns\n    -------\n    DataFrame\n        Dummy-coded data. If `data` contains other columns than the\n        dummy-coded one(s), these will be prepended, unaltered, to the result.\n\n    See Also\n    --------\n    Series.str.get_dummies : Convert Series of strings to dummy codes.\n    :func:`~pandas.from_dummies` : Convert dummy codes to categorical ``DataFrame``.\n\n    Notes\n    -----\n    Reference :ref:`the user guide <reshaping.dummies>` for more examples.\n\n    Examples\n    --------\n    >>> s = pd.Series(list('abca'))\n\n    >>> pd.get_dummies(s)\n           a      b      c\n    0   True  False  False\n    1  False   True  False\n    2  False  False   True\n    3   True  False  False\n\n    >>> s1 = ['a', 'b', np.nan]\n\n    >>> pd.get_dummies(s1)\n           a      b\n    0   True  False\n    1  False   True\n    2  False  False\n\n    >>> pd.get_dummies(s1, dummy_na=True)\n           a      b    NaN\n    0   True  False  False\n    1  False   True  False\n    2  False  False   True\n\n    >>> df = pd.DataFrame({'A': ['a', 'b', 'a'], 'B': ['b', 'a', 'c'],\n    ...                    'C': [1, 2, 3]})\n\n    >>> pd.get_dummies(df, prefix=['col1', 'col2'])\n       C  col1_a  col1_b  col2_a  col2_b  col2_c\n    0  1    True   False   False    True   False\n    1  2   False    True    True   False   False\n    2  3    True   False   False   False    True\n\n    >>> pd.get_dummies(pd.Series(list('abcaa')))\n           a      b      c\n    0   True  False  False\n    1  False   True  False\n    2  False  False   True\n    3   True  False  False\n    4   True  False  False\n\n    >>> pd.get_dummies(pd.Series(list('abcaa')), drop_first=True)\n           b      c\n    0  False  False\n    1   True  False\n    2  False   True\n    3  False  False\n    4  False  False\n\n    >>> pd.get_dummies(pd.Series(list('abc')), dtype=float)\n         a    b    c\n    0  1.0  0.0  0.0\n    1  0.0  1.0  0.0\n    2  0.0  0.0  1.0\n    \"\"\"\n    from pandas.core.reshape.concat import concat\n\n    dtypes_to_encode = [\"object\", \"string\", \"category\"]\n\n    if isinstance(data, DataFrame):\n        # determine columns being encoded\n        if columns is None:\n            data_to_encode = data.select_dtypes(include=dtypes_to_encode)\n        elif not is_list_like(columns):\n            raise TypeError(\"Input must be a list-like for parameter `columns`\")\n        else:\n            data_to_encode = data[columns]\n\n        # validate prefixes and separator to avoid silently dropping cols\n        def check_len(item, name: str):\n            if is_list_like(item):\n                if not len(item) == data_to_encode.shape[1]:\n                    len_msg = (\n                        f\"Length of '{name}' ({len(item)}) did not match the \"\n                        \"length of the columns being encoded \"\n                        f\"({data_to_encode.shape[1]}).\"\n                    )\n                    raise ValueError(len_msg)\n\n        check_len(prefix, \"prefix\")\n        check_len(prefix_sep, \"prefix_sep\")\n\n        if isinstance(prefix, str):\n            prefix = itertools.cycle([prefix])\n        if isinstance(prefix, dict):\n            prefix = [prefix[col] for col in data_to_encode.columns]\n\n        if prefix is None:\n            prefix = data_to_encode.columns\n\n        # validate separators\n        if isinstance(prefix_sep, str):\n            prefix_sep = itertools.cycle([prefix_sep])\n        elif isinstance(prefix_sep, dict):\n            prefix_sep = [prefix_sep[col] for col in data_to_encode.columns]\n\n        with_dummies: list[DataFrame]\n        if data_to_encode.shape == data.shape:\n            # Encoding the entire df, do not prepend any dropped columns\n            with_dummies = []\n        elif columns is not None:\n            # Encoding only cols specified in columns. Get all cols not in\n            # columns to prepend to result.\n            with_dummies = [data.drop(columns, axis=1)]\n        else:\n            # Encoding only object and category dtype columns. Get remaining\n            # columns to prepend to result.\n            with_dummies = [data.select_dtypes(exclude=dtypes_to_encode)]\n\n        for col, pre, sep in zip(data_to_encode.items(), prefix, prefix_sep):\n            # col is (column_name, column), use just column data here\n            dummy = _get_dummies_1d(\n                col[1],\n                prefix=pre,\n                prefix_sep=sep,\n                dummy_na=dummy_na,\n                sparse=sparse,\n                drop_first=drop_first,\n                dtype=dtype,\n            )\n            with_dummies.append(dummy)\n        result = concat(with_dummies, axis=1)\n    else:\n        result = _get_dummies_1d(\n            data,\n            prefix,\n            prefix_sep,\n            dummy_na,\n            sparse=sparse,\n            drop_first=drop_first,\n            dtype=dtype,\n        )\n    return result\n"
+}

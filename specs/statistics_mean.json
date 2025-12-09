@@ -1,0 +1,37 @@
+{
+  "package": "statistics",
+  "version": "1.0.3.5",
+  "qualified_name": "statistics.mean",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_statistics_0ewqz6tw/statistics-1.0.3.5/statistics/__init__.py",
+  "signature": "(data)",
+  "parameters": [
+    {
+      "name": "data",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": null,
+      "default": null,
+      "required": true,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    }
+  ],
+  "returns": {
+    "type": null,
+    "description": null
+  },
+  "raises": [
+    "StatisticsError"
+  ],
+  "notes": null,
+  "examples_code": null,
+  "module_imports": [
+    "from __future__ import division",
+    "import collections",
+    "import math",
+    "from fractions import Fraction",
+    "from decimal import Decimal",
+    "    from the mean are calculated in a second pass. Otherwise, deviations are"
+  ],
+  "body_stripped": "def mean(data):\n    u\"\"\"Return the sample arithmetic mean of data.\n\n    >>> mean([1, 2, 3, 4, 4])\n    2.8\n\n    >>> from fractions import Fraction as F\n    >>> mean([F(3, 7), F(1, 21), F(5, 3), F(1, 3)])\n    Fraction(13, 21)\n\n    >>> from decimal import Decimal as D\n    >>> mean([D(\"0.5\"), D(\"0.75\"), D(\"0.625\"), D(\"0.375\")])\n    Decimal('0.5625')\n\n    If ``data`` is empty, StatisticsError will be raised.\n    \"\"\"\n    if iter(data) is data:\n        data = list(data)\n    n = len(data)\n    if n < 1:\n        raise StatisticsError(u'mean requires at least one data point')\n    return _sum(data)/n\n"
+}

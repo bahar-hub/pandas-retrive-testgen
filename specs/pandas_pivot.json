@@ -1,0 +1,83 @@
+{
+  "package": "pandas",
+  "version": "2.3.3",
+  "qualified_name": "pandas.core.reshape.pivot.pivot",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_pandas_1lg0vkhi/pandas-2.3.3/pandas/core/reshape/pivot.py",
+  "signature": "(data: DataFrame, columns: IndexLabel, index: IndexLabel | lib.NoDefault = lib.no_default, values: IndexLabel | lib.NoDefault = lib.no_default) -> DataFrame",
+  "parameters": [
+    {
+      "name": "data",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "DataFrame",
+      "default": null,
+      "required": true,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "columns",
+      "kind": "KEYWORD_ONLY",
+      "type": "IndexLabel",
+      "default": null,
+      "required": true,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "index",
+      "kind": "KEYWORD_ONLY",
+      "type": "IndexLabel | lib.NoDefault",
+      "default": "lib.no_default",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    },
+    {
+      "name": "values",
+      "kind": "KEYWORD_ONLY",
+      "type": "IndexLabel | lib.NoDefault",
+      "default": "lib.no_default",
+      "required": false,
+      "nullable": null,
+      "enum": null,
+      "description": null
+    }
+  ],
+  "returns": {
+    "type": "DataFrame",
+    "description": null
+  },
+  "raises": null,
+  "notes": null,
+  "examples_code": null,
+  "module_imports": [
+    "from __future__ import annotations",
+    "from collections.abc import (",
+    "from typing import (",
+    "import warnings",
+    "import numpy as np",
+    "from pandas._libs import lib",
+    "from pandas.util._decorators import (",
+    "from pandas.util._exceptions import find_stack_level",
+    "from pandas.core.dtypes.cast import maybe_downcast_to_dtype",
+    "from pandas.core.dtypes.common import (",
+    "from pandas.core.dtypes.dtypes import ExtensionDtype",
+    "from pandas.core.dtypes.generic import (",
+    "import pandas.core.common as com",
+    "from pandas.core.frame import _shared_docs",
+    "from pandas.core.groupby import Grouper",
+    "from pandas.core.indexes.api import (",
+    "from pandas.core.reshape.concat import concat",
+    "from pandas.core.reshape.util import cartesian_product",
+    "from pandas.core.series import Series",
+    "    from pandas._typing import (",
+    "    from pandas import DataFrame",
+    "    from pandas import DataFrame",
+    "            from pandas import DataFrame",
+    "    from pandas import DataFrame"
+  ],
+  "body_stripped": "def pivot(\n    data: DataFrame,\n    *,\n    columns: IndexLabel,\n    index: IndexLabel | lib.NoDefault = lib.no_default,\n    values: IndexLabel | lib.NoDefault = lib.no_default,\n) -> DataFrame:\n    columns_listlike = com.convert_to_list_like(columns)\n\n    # If columns is None we will create a MultiIndex level with None as name\n    # which might cause duplicated names because None is the default for\n    # level names\n    data = data.copy(deep=False)\n    data.index = data.index.copy()\n    data.index.names = [\n        name if name is not None else lib.no_default for name in data.index.names\n    ]\n\n    indexed: DataFrame | Series\n    if values is lib.no_default:\n        if index is not lib.no_default:\n            cols = com.convert_to_list_like(index)\n        else:\n            cols = []\n\n        append = index is lib.no_default\n        # error: Unsupported operand types for + (\"List[Any]\" and \"ExtensionArray\")\n        # error: Unsupported left operand type for + (\"ExtensionArray\")\n        indexed = data.set_index(\n            cols + columns_listlike, append=append  # type: ignore[operator]\n        )\n    else:\n        index_list: list[Index] | list[Series]\n        if index is lib.no_default:\n            if isinstance(data.index, MultiIndex):\n                # GH 23955\n                index_list = [\n                    data.index.get_level_values(i) for i in range(data.index.nlevels)\n                ]\n            else:\n                index_list = [\n                    data._constructor_sliced(data.index, name=data.index.name)\n                ]\n        else:\n            index_list = [data[idx] for idx in com.convert_to_list_like(index)]\n\n        data_columns = [data[col] for col in columns_listlike]\n        index_list.extend(data_columns)\n        multiindex = MultiIndex.from_arrays(index_list)\n\n        if is_list_like(values) and not isinstance(values, tuple):\n            # Exclude tuple because it is seen as a single column name\n            values = cast(Sequence[Hashable], values)\n            indexed = data._constructor(\n                data[values]._values, index=multiindex, columns=values\n            )\n        else:\n            indexed = data._constructor_sliced(data[values]._values, index=multiindex)\n    # error: Argument 1 to \"unstack\" of \"DataFrame\" has incompatible type \"Union\n    # [List[Any], ExtensionArray, ndarray[Any, Any], Index, Series]\"; expected\n    # \"Hashable\"\n    result = indexed.unstack(columns_listlike)  # type: ignore[arg-type]\n    result.index.names = [\n        name if name is not lib.no_default else None for name in result.index.names\n    ]\n\n    return result\n"
+}

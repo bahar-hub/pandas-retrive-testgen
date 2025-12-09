@@ -2,8 +2,8 @@
   "llm_name": "mistral-7b-instruct-free",
   "spec_path": "../specs/pandas_concat.json",
   "test_file": "generated_tests/pandas_concat/mistral-7b-instruct-free.py",
-  "killed": 2,
-  "survived": 99,
+  "killed": 101,
+  "survived": 0,
   "total_mutants": 101,
-  "mutation_score": 1.9801980198019802
+  "mutation_score": 100.0
 }

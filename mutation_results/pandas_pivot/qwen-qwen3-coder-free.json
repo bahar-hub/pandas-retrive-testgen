@@ -1,0 +1,9 @@
+{
+  "llm_name": "qwen-qwen3-coder-free",
+  "spec_path": "../specs/pandas_pivot.json",
+  "test_file": "generated_tests/pandas_pivot/qwen-qwen3-coder-free.py",
+  "killed": 5,
+  "survived": 0,
+  "total_mutants": 5,
+  "mutation_score": 100.0
+}

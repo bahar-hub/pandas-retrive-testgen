@@ -1,0 +1,181 @@
+{
+  "provider": "pattern",
+  "profile_name": "Pattern Test 1",
+  "model_name": "",
+  "chunk_size": 3000,
+  "max_chunks": null,
+  "extraction_time": 0.003255128860473633,
+  "timestamp": "2025-12-02T15:26:56.049046",
+  "functions": [
+    {
+      "name": "detect_anomaly",
+      "parameters": [
+        {
+          "name": "series",
+          "type": "unknown"
+        },
+        {
+          "name": "model",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "None",
+      "description": "Extracted by regex",
+      "line_number": 13
+    },
+    {
+      "name": "merge_streams",
+      "parameters": [
+        {
+          "name": "a",
+          "type": "unknown"
+        },
+        {
+          "name": "b",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "None",
+      "description": "Extracted by regex",
+      "line_number": 100
+    },
+    {
+      "name": "export_metrics",
+      "parameters": [
+        {
+          "name": "format",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "None",
+      "description": "Extracted by regex",
+      "line_number": 139
+    },
+    {
+      "name": "pushToCloud",
+      "parameters": [
+        {
+          "name": "payload",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 15
+    },
+    {
+      "name": "computeAverage",
+      "parameters": [
+        {
+          "name": "sensorType",
+          "type": "unknown"
+        },
+        {
+          "name": "window=60",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 37
+    },
+    {
+      "name": "document",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 2
+    },
+    {
+      "name": "modules",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 9
+    },
+    {
+      "name": "generateSummary",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 14
+    },
+    {
+      "name": "NOTES",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 36
+    },
+    {
+      "name": "retrainModel",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 38
+    },
+    {
+      "name": "Predict",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 39
+    },
+    {
+      "name": "SCENARIOS",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 45
+    },
+    {
+      "name": "collectSensorData",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 49
+    },
+    {
+      "name": "backoﬀ",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 76
+    },
+    {
+      "name": "database",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 91
+    },
+    {
+      "name": "extraction",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 92
+    },
+    {
+      "name": "alert",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 99
+    },
+    {
+      "name": "LogEvent",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 101
+    },
+    {
+      "name": "aggregateDaily",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 117
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "llm_name": "meta-llama-llama-3.3-70b-instruct-free",
+  "spec_path": "../specs/pandas_pivot_table.json",
+  "test_file": "generated_tests/pandas_pivot_table/meta-llama-llama-3.3-70b-instruct-free.py",
+  "target_qualified_name": "pandas.pivot_table",
+  "killed": 4,
+  "survived": 0,
+  "total_mutants": 4,
+  "mutation_score": 100.0
+}

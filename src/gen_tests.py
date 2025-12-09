@@ -3,7 +3,7 @@
 """
 gen_concat_tests.py
 
-Generate pytest test suites for `pandas.concat` (or any extracted function)
+Generate pytest test suites for extracted Python functions
 using one or more LLMs via either:
     - Ollama (local models)
     - OpenRouter (cloud models)
@@ -15,20 +15,20 @@ This script:
         – exact function source
         – signature
         – examples
-        – pandas version
-        – environment metadata
+        – environment metadata (Python, pandas if available)
     • Sends the prompt to multiple models (OpenRouter/Ollama)
     • Saves each model’s generated test suite as a .py file
 
 Typical usage:
     python gen_concat_tests.py \
-        --src pandas_concat.json \
+        --src pandas_melt.json \
         --out-pattern "generated/{model}.py" \
         --models "mistral-7b-instruct:free,qwen3-coder:free" \
         --default-provider openrouter
 
 The test generation stage is fully automated and designed to work with ANY
-Python function extracted via fetch.py—not just pandas.concat.
+Python function extracted via fetch.py (e.g., pandas.melt, pandas.concat,
+or custom functions from your own modules).
 """
 
 from __future__ import annotations
@@ -44,7 +44,12 @@ from pathlib import Path
 from typing import Iterator, Optional, Sequence, Tuple
 
 import requests
-import pandas as pd
+
+# pandas is optional: used only for reporting version in the prompt
+try:
+    import pandas as pd  # type: ignore[import-not-found]
+except Exception:  # pragma: no cover - environment without pandas
+    pd = None  # type: ignore[assignment]
 
 
 # Global Configuration Defaults
@@ -67,7 +72,6 @@ ENV_OPENROUTER_API_KEY = "OPENROUTER_API_KEY"
 HARDCODED_OPENROUTER_API_KEY: Optional[str] = None
 
 
-# Prompt Template (LLM Instruction)
 
 PROMPT_TEMPLATE = """
 You are a precise code generator and a senior Python test engineer.
@@ -75,47 +79,52 @@ Output ONLY valid Python code (no explanations, no markdown fences).
 
 Target environment:
 - Python: {python_version}
-- pandas: {pandas_version}
+- pandas: {pandas_version} (if available / relevant)
+
+Target function:
+- Qualified name: {target_qualified_name}
+- Module: {module_name}
 
 Task:
-Given the exact source of the function `pandas.concat` (below),
+Given the exact source of the target function `{target_qualified_name}` (below),
 write a comprehensive `pytest` test file named "{outfile}" that validates
-its behavior across edge cases.
+its behavior across typical and edge cases.
 
 Important constraints:
-- All tests MUST pass on the given pandas version.
-- Avoid undocumented or private API behavior.
-- Use only stable and documented parameters supported by this version.
-- Tests must be deterministic, no random data, no I/O, no network.
+- All tests MUST pass in the given environment.
+- Avoid undocumented or private API behavior (if using external libraries).
+- Use only stable and documented parameters / usage patterns supported by this environment.
+- Tests must be deterministic: no randomness, no I/O, no filesystem access, no network.
+- Do not rely on external services or shared global state outside the test file.
 
-Coverage requirements:
-- axis (0/1)
-- keys / levels / names
-- ignore_index
-- join = ('outer', 'inner')
-- sort
-- verify_integrity
-- Series vs DataFrame concatenation
-- empty inputs and mixed dtypes
-- non-unique index behavior
-- MultiIndex scenarios
-- datetime/categorical/bool/object/numeric dtype mixes
-- handling of views/copies if applicable
+Coverage requirements (interpret GENERICALLY for this function):
+- Cover different valid argument combinations (positional and keyword).
+- Cover boundary values and edge cases (e.g., empty inputs, minimal/maximal sizes, edge numeric values).
+- Cover different shapes / structures / dtypes that are meaningful for this function.
+- Cover behavior with optional parameters toggled (e.g., flags, modes, boolean switches).
+- If the documented behavior raises exceptions for certain invalid inputs,
+  include tests that assert those exceptions with `pytest.raises`.
+
+If the function operates on pandas objects:
+- Prefer using `pandas.testing.assert_frame_equal` and `pandas.testing.assert_series_equal`
+  instead of raw equality checks.
+- Include tests with mixed dtypes where relevant (numeric, object, bool, datetime, categorical, etc.).
+- Include tests for empty inputs, non-unique index behavior, and MultiIndex where relevant.
 
 Use:
 - pytest
-- pandas.testing.assert_frame_equal
-- pandas.testing.assert_series_equal
+- Standard library only (and pandas if needed for the target function).
 
 Prefer:
-- Many small focused tests
-- Clear naming (test_*)
-- Self-contained and minimal imports
+- Many small, focused tests.
+- Clear naming (test_*).
+- Self-contained tests with minimal, explicit imports.
+- Explicit, readable assertions (no overly clever one-liners).
 
 Function signature (for reference):
 {signature_block}
 
-Selected examples from documentation:
+Selected examples from documentation (for inspiration, not for copy-paste):
 {examples_block}
 
 Function source:
@@ -151,16 +160,25 @@ def sanitize_filename_piece(s: str) -> str:
 def load_source_and_spec(src: Path) -> Tuple[str, Optional[dict]]:
     """
     Load a function specification:
-        • If src is JSON → return (body_stripped, full spec)
+        • If src is JSON → return (function_source, full spec)
+            - Prefer 'full_source' or 'source' if available
+            - Fallback to 'body_stripped'
         • If src is .py or raw → return (content, None)
     """
     text = read_text(src)
     if src.suffix.lower() == ".json":
         spec = json.loads(text)
-        body = spec.get("body_stripped", "")
-        if not body:
-            raise RuntimeError("JSON spec missing 'body_stripped'.")
-        return body, spec
+        func_src = (
+            spec.get("full_source")
+            or spec.get("source")
+            or spec.get("body_stripped", "")
+        )
+        if not func_src:
+            raise RuntimeError(
+                "JSON spec missing 'full_source', 'source', and 'body_stripped'."
+            )
+        return func_src, spec
+    # Raw .py or text file
     return text, None
 
 
@@ -170,12 +188,42 @@ def build_prompt(func_source: str, outfile: str, spec: Optional[dict]) -> str:
     """Construct the full LLM prompt with environment + signature + examples."""
     python_version = ".".join(map(str, sys.version_info[:3]))
 
+    # Resolve pandas version (optional)
     if spec is not None:
-        pandas_version = spec.get("version", pd.__version__)
+        pandas_version = spec.get("version")
+        if not pandas_version and pd is not None:
+            pandas_version = pd.__version__
+    else:
+        pandas_version = pd.__version__ if pd is not None else None
+
+    if not pandas_version:
+        pandas_version = "N/A"
+
+    # Resolve function metadata from spec
+    if spec is not None:
+        # Try multiple common keys for qualified name
+        target_qualified_name = (
+            spec.get("qualified_name")
+            or spec.get("full_name")
+            or spec.get("name")
+            or spec.get("func_name")
+        )
+        module_name = spec.get("module") or spec.get("module_name")
+
+        # If we have module + bare name but no qualified_name, compose it
+        if not target_qualified_name and module_name and spec.get("name"):
+            target_qualified_name = f"{module_name}.{spec['name']}"
+
+        if not target_qualified_name:
+            target_qualified_name = "(unknown_function)"
+        if not module_name:
+            module_name = "(unknown_module)"
+
         signature = spec.get("signature", "")
         examples = spec.get("examples_code") or []
     else:
-        pandas_version = pd.__version__
+        target_qualified_name = "(unknown_function)"
+        module_name = "(unknown_module)"
         signature = ""
         examples = []
 
@@ -195,6 +243,8 @@ def build_prompt(func_source: str, outfile: str, spec: Optional[dict]) -> str:
         pandas_version=pandas_version,
         signature_block=signature_block,
         examples_block=examples_block,
+        target_qualified_name=target_qualified_name,
+        module_name=module_name,
     )
 
 
@@ -399,7 +449,9 @@ class OpenRouterClient:
                         details = r.json()
                     except Exception:
                         details = {"error_text": r.text}
-                    r.raise_for_status()
+                    raise RuntimeError(
+                        f"OpenRouter HTTP {r.status_code}: {details}"
+                    )
 
                 data = r.json()
 
@@ -439,14 +491,14 @@ def parse_models_arg(models_str: str, default_provider: str) -> list[Tuple[str, 
         ]
     """
     known_prefixes = ("openrouter:", "ollama:")
-    items = []
+    items: list[Tuple[str, str]] = []
 
     for raw in (s.strip() for s in models_str.split(",") if s.strip()):
         lower = raw.lower()
         if lower.startswith(known_prefixes):
             first_colon = raw.find(":")
             provider = raw[:first_colon].lower()
-            model = raw[first_colon + 1:].strip()
+            model = raw[first_colon + 1 :].strip()
         else:
             provider = default_provider.lower()
             model = raw
@@ -470,8 +522,11 @@ def run_one(
         client = OllamaClient(OllamaOptions(**{**ollama_opts.__dict__, "model": model}))
         try:
             if not client.model_available(model):
-                print(f"[WARN] Ollama model '{model}' not found (may require 'ollama pull {model}').",
-                      file=sys.stderr)
+                print(
+                    f"[WARN] Ollama model '{model}' not found "
+                    f"(may require 'ollama pull {model}').",
+                    file=sys.stderr,
+                )
         except Exception:
             pass
         return client.generate(prompt)
@@ -523,7 +578,10 @@ def run_many(
 
             code = extract_code_block(raw)
             if not code:
-                print(f"[ERROR] {provider}:{model} returned empty code.", file=sys.stderr)
+                print(
+                    f"[ERROR] {provider}:{model} returned empty code.",
+                    file=sys.stderr,
+                )
                 continue
 
             out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -541,12 +599,16 @@ def run_many(
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate pytest tests for a function (e.g., pandas.concat) using multiple LLM models."
+        description=(
+            "Generate pytest tests for a Python function extracted via fetch.py "
+            "(e.g., pandas.melt, pandas.concat, or custom functions) using "
+            "multiple LLM models."
+        )
     )
 
     parser.add_argument(
         "--src",
-        default="pandas_concat.json",
+        default="pandas_melt.json",
         help="Path to JSON spec (from fetch.py) or raw code file.",
     )
     parser.add_argument(

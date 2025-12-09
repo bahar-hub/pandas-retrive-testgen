@@ -1,0 +1,160 @@
+{
+  "package": "pandas",
+  "version": "2.3.3",
+  "qualified_name": "pandas.core.computation.eval.eval",
+  "file": "/var/folders/8y/1_rm_t850ndf6rxl9ggy1qdh0000gn/T/spec_pandas__tgi9fgl/pandas-2.3.3/pandas/core/computation/eval.py",
+  "signature": "(expr: str | BinOp, parser: str = 'pandas', engine: str | None = None, local_dict = None, global_dict = None, resolvers = (), level: int = 0, target = None, inplace: bool = False)",
+  "parameters": [
+    {
+      "name": "expr",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "str | BinOp",
+      "default": null,
+      "required": true,
+      "nullable": false,
+      "enum": null,
+      "description": "The expression to evaluate. This string cannot contain any Python `statements <https://docs.python.org/3/reference/simple_stmts.html#simple-statements>`__, only Python `expressions <https://docs.python.org/3/reference/simple_stmts.html#expression-statements>`__."
+    },
+    {
+      "name": "parser",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "str",
+      "default": "'pandas'",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "pandas",
+        "python"
+      ],
+      "description": "The parser to use to construct the syntax tree from the expression. The default of ``'pandas'`` parses code slightly different than standard Python. Alternatively, you can parse an expression using the ``'python'`` parser to retain strict Python semantics.  See the :ref:`enhancing performance <enhancingperf.eval>` documentation for more details."
+    },
+    {
+      "name": "engine",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "str | None",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "python",
+        "numexpr"
+      ],
+      "description": null
+    },
+    {
+      "name": "local_dict",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "dict or None, optional",
+      "default": "None",
+      "required": false,
+      "nullable": true,
+      "enum": null,
+      "description": "A dictionary of local variables, taken from locals() by default."
+    },
+    {
+      "name": "global_dict",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "dict or None, optional",
+      "default": "None",
+      "required": false,
+      "nullable": true,
+      "enum": null,
+      "description": "A dictionary of global variables, taken from globals() by default."
+    },
+    {
+      "name": "resolvers",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "list of dict-like or None, optional",
+      "default": "()",
+      "required": false,
+      "nullable": true,
+      "enum": null,
+      "description": "A list of objects implementing the ``__getitem__`` special method that you can use to inject an additional collection of namespaces to use for variable lookup. For example, this is used in the :meth:`~DataFrame.query` method to inject the ``DataFrame.index`` and ``DataFrame.columns`` variables that refer to their respective :class:`~pandas.DataFrame` instance attributes."
+    },
+    {
+      "name": "level",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "int",
+      "default": "0",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "The number of prior stack frames to traverse and add to the current scope. Most users will **not** need to change this parameter."
+    },
+    {
+      "name": "target",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "object, optional",
+      "default": "None",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "This is the target object for assignment. It is used when there is variable assignment in the expression. If so, then `target` must support item assignment with string keys, and if a copy is being returned, it must also support `.copy()`."
+    },
+    {
+      "name": "inplace",
+      "kind": "POSITIONAL_OR_KEYWORD",
+      "type": "bool",
+      "default": "False",
+      "required": false,
+      "nullable": false,
+      "enum": null,
+      "description": "If `target` is provided, and the expression mutates `target`, whether to modify `target` inplace. Otherwise, return a copy of `target` with the mutation."
+    }
+  ],
+  "returns": {
+    "type": null,
+    "description": "ndarray, numeric scalar, DataFrame, Series, or None\n    The completion value of evaluating the given code or None if ``inplace=True``."
+  },
+  "raises": [
+    "ValueError",
+    "There are many instances where such an error can be raised:",
+    "`target=None`, but the expression is multiline.",
+    "The expression is multiline, but not all them have item assignment.",
+    "An example of such an arrangement is this:",
+    "a = b + 1",
+    "a + 2",
+    "Here, there are expressions on different lines, making it multiline,",
+    "but the last line has no variable assigned to the output of `a + 2`.",
+    "`inplace=True`, but the expression is missing item assignment.",
+    "Item assignment is provided, but the `target` does not support",
+    "string item assignment.",
+    "Item assignment is provided and `inplace=False`, but the `target`",
+    "does not support the `.copy()` method",
+    "See Also",
+    "",
+    "DataFrame.query : Evaluates a boolean expression to query the columns",
+    "of a frame.",
+    "DataFrame.eval : Evaluate a string describing operations on",
+    "DataFrame columns."
+  ],
+  "notes": [
+    "The ``dtype`` of any objects involved in an arithmetic ``%`` operation are",
+    "recursively cast to ``float64``.",
+    "See the :ref:`enhancing performance <enhancingperf.eval>` documentation for",
+    "more details."
+  ],
+  "examples_code": [
+    "df = pd.DataFrame({\"animal\": [\"dog\", \"pig\"], \"age\": [10, 20]})\ndf",
+    "pd.eval(\"double_age = df.age * 2\", target=df)"
+  ],
+  "module_imports": [
+    "from __future__ import annotations",
+    "import tokenize",
+    "from typing import TYPE_CHECKING",
+    "import warnings",
+    "from pandas.util._exceptions import find_stack_level",
+    "from pandas.util._validators import validate_bool_kwarg",
+    "from pandas.core.dtypes.common import (",
+    "from pandas.core.computation.engines import ENGINES",
+    "from pandas.core.computation.expr import (",
+    "from pandas.core.computation.parsing import tokenize_string",
+    "from pandas.core.computation.scope import ensure_scope",
+    "from pandas.core.generic import NDFrame",
+    "from pandas.io.formats.printing import pprint_thing",
+    "    from pandas.core.computation.ops import BinOp",
+    "    from pandas.core.computation.check import NUMEXPR_INSTALLED",
+    "    from pandas.core.computation.expressions import USE_NUMEXPR"
+  ],
+  "body_stripped": "def eval(\n    expr: str | BinOp,  # we leave BinOp out of the docstr bc it isn't for users\n    parser: str = \"pandas\",\n    engine: str | None = None,\n    local_dict=None,\n    global_dict=None,\n    resolvers=(),\n    level: int = 0,\n    target=None,\n    inplace: bool = False,\n):\n    \"\"\"\n    Evaluate a Python expression as a string using various backends.\n\n    The following arithmetic operations are supported: ``+``, ``-``, ``*``,\n    ``/``, ``**``, ``%``, ``//`` (python engine only) along with the following\n    boolean operations: ``|`` (or), ``&`` (and), and ``~`` (not).\n    Additionally, the ``'pandas'`` parser allows the use of :keyword:`and`,\n    :keyword:`or`, and :keyword:`not` with the same semantics as the\n    corresponding bitwise operators.  :class:`~pandas.Series` and\n    :class:`~pandas.DataFrame` objects are supported and behave as they would\n    with plain ol' Python evaluation.\n\n    Parameters\n    ----------\n    expr : str\n        The expression to evaluate. This string cannot contain any Python\n        `statements\n        <https://docs.python.org/3/reference/simple_stmts.html#simple-statements>`__,\n        only Python `expressions\n        <https://docs.python.org/3/reference/simple_stmts.html#expression-statements>`__.\n    parser : {'pandas', 'python'}, default 'pandas'\n        The parser to use to construct the syntax tree from the expression. The\n        default of ``'pandas'`` parses code slightly different than standard\n        Python. Alternatively, you can parse an expression using the\n        ``'python'`` parser to retain strict Python semantics.  See the\n        :ref:`enhancing performance <enhancingperf.eval>` documentation for\n        more details.\n    engine : {'python', 'numexpr'}, default 'numexpr'\n\n        The engine used to evaluate the expression. Supported engines are\n\n        - None : tries to use ``numexpr``, falls back to ``python``\n        - ``'numexpr'`` : This default engine evaluates pandas objects using\n          numexpr for large speed ups in complex expressions with large frames.\n        - ``'python'`` : Performs operations as if you had ``eval``'d in top\n          level python. This engine is generally not that useful.\n\n        More backends may be available in the future.\n    local_dict : dict or None, optional\n        A dictionary of local variables, taken from locals() by default.\n    global_dict : dict or None, optional\n        A dictionary of global variables, taken from globals() by default.\n    resolvers : list of dict-like or None, optional\n        A list of objects implementing the ``__getitem__`` special method that\n        you can use to inject an additional collection of namespaces to use for\n        variable lookup. For example, this is used in the\n        :meth:`~DataFrame.query` method to inject the\n        ``DataFrame.index`` and ``DataFrame.columns``\n        variables that refer to their respective :class:`~pandas.DataFrame`\n        instance attributes.\n    level : int, optional\n        The number of prior stack frames to traverse and add to the current\n        scope. Most users will **not** need to change this parameter.\n    target : object, optional, default None\n        This is the target object for assignment. It is used when there is\n        variable assignment in the expression. If so, then `target` must\n        support item assignment with string keys, and if a copy is being\n        returned, it must also support `.copy()`.\n    inplace : bool, default False\n        If `target` is provided, and the expression mutates `target`, whether\n        to modify `target` inplace. Otherwise, return a copy of `target` with\n        the mutation.\n\n    Returns\n    -------\n    ndarray, numeric scalar, DataFrame, Series, or None\n        The completion value of evaluating the given code or None if ``inplace=True``.\n\n    Raises\n    ------\n    ValueError\n        There are many instances where such an error can be raised:\n\n        - `target=None`, but the expression is multiline.\n        - The expression is multiline, but not all them have item assignment.\n          An example of such an arrangement is this:\n\n          a = b + 1\n          a + 2\n\n          Here, there are expressions on different lines, making it multiline,\n          but the last line has no variable assigned to the output of `a + 2`.\n        - `inplace=True`, but the expression is missing item assignment.\n        - Item assignment is provided, but the `target` does not support\n          string item assignment.\n        - Item assignment is provided and `inplace=False`, but the `target`\n          does not support the `.copy()` method\n\n    See Also\n    --------\n    DataFrame.query : Evaluates a boolean expression to query the columns\n            of a frame.\n    DataFrame.eval : Evaluate a string describing operations on\n            DataFrame columns.\n\n    Notes\n    -----\n    The ``dtype`` of any objects involved in an arithmetic ``%`` operation are\n    recursively cast to ``float64``.\n\n    See the :ref:`enhancing performance <enhancingperf.eval>` documentation for\n    more details.\n\n    Examples\n    --------\n    >>> df = pd.DataFrame({\"animal\": [\"dog\", \"pig\"], \"age\": [10, 20]})\n    >>> df\n      animal  age\n    0    dog   10\n    1    pig   20\n\n    We can add a new column using ``pd.eval``:\n\n    >>> pd.eval(\"double_age = df.age * 2\", target=df)\n      animal  age  double_age\n    0    dog   10          20\n    1    pig   20          40\n    \"\"\"\n    inplace = validate_bool_kwarg(inplace, \"inplace\")\n\n    exprs: list[str | BinOp]\n    if isinstance(expr, str):\n        _check_expression(expr)\n        exprs = [e.strip() for e in expr.splitlines() if e.strip() != \"\"]\n    else:\n        # ops.BinOp; for internal compat, not intended to be passed by users\n        exprs = [expr]\n    multi_line = len(exprs) > 1\n\n    if multi_line and target is None:\n        raise ValueError(\n            \"multi-line expressions are only valid in the \"\n            \"context of data, use DataFrame.eval\"\n        )\n    engine = _check_engine(engine)\n    _check_parser(parser)\n    _check_resolvers(resolvers)\n\n    ret = None\n    first_expr = True\n    target_modified = False\n\n    for expr in exprs:\n        expr = _convert_expression(expr)\n        _check_for_locals(expr, level, parser)\n\n        # get our (possibly passed-in) scope\n        env = ensure_scope(\n            level + 1,\n            global_dict=global_dict,\n            local_dict=local_dict,\n            resolvers=resolvers,\n            target=target,\n        )\n\n        parsed_expr = Expr(expr, engine=engine, parser=parser, env=env)\n\n        if engine == \"numexpr\" and (\n            (\n                is_extension_array_dtype(parsed_expr.terms.return_type)\n                and not is_string_dtype(parsed_expr.terms.return_type)\n            )\n            or getattr(parsed_expr.terms, \"operand_types\", None) is not None\n            and any(\n                (is_extension_array_dtype(elem) and not is_string_dtype(elem))\n                for elem in parsed_expr.terms.operand_types\n            )\n        ):\n            warnings.warn(\n                \"Engine has switched to 'python' because numexpr does not support \"\n                \"extension array dtypes. Please set your engine to python manually.\",\n                RuntimeWarning,\n                stacklevel=find_stack_level(),\n            )\n            engine = \"python\"\n\n        # construct the engine and evaluate the parsed expression\n        eng = ENGINES[engine]\n        eng_inst = eng(parsed_expr)\n        ret = eng_inst.evaluate()\n\n        if parsed_expr.assigner is None:\n            if multi_line:\n                raise ValueError(\n                    \"Multi-line expressions are only valid \"\n                    \"if all expressions contain an assignment\"\n                )\n            if inplace:\n                raise ValueError(\"Cannot operate inplace if there is no assignment\")\n\n        # assign if needed\n        assigner = parsed_expr.assigner\n        if env.target is not None and assigner is not None:\n            target_modified = True\n\n            # if returning a copy, copy only on the first assignment\n            if not inplace and first_expr:\n                try:\n                    target = env.target\n                    if isinstance(target, NDFrame):\n                        target = target.copy(deep=None)\n                    else:\n                        target = target.copy()\n                except AttributeError as err:\n                    raise ValueError(\"Cannot return a copy of the target\") from err\n            else:\n                target = env.target\n\n            # TypeError is most commonly raised (e.g. int, list), but you\n            # get IndexError if you try to do this assignment on np.ndarray.\n            # we will ignore numpy warnings here; e.g. if trying\n            # to use a non-numeric indexer\n            try:\n                if inplace and isinstance(target, NDFrame):\n                    target.loc[:, assigner] = ret\n                else:\n                    target[assigner] = ret  # pyright: ignore[reportGeneralTypeIssues]\n            except (TypeError, IndexError) as err:\n                raise ValueError(\"Cannot assign expression output to target\") from err\n\n            if not resolvers:\n                resolvers = ({assigner: ret},)\n            else:\n                # existing resolver needs updated to handle\n                # case of mutating existing column in copy\n                for resolver in resolvers:\n                    if assigner in resolver:\n                        resolver[assigner] = ret\n                        break\n                else:\n                    resolvers += ({assigner: ret},)\n\n            ret = None\n            first_expr = False\n\n    # We want to exclude `inplace=None` as being False.\n    if inplace is False:\n        return target if target_modified else ret\n"
+}

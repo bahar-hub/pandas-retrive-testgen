@@ -1,0 +1,10 @@
+{
+  "llm_name": "mistralai-mistral-7b-instruct-free",
+  "spec_path": "../specs/pandas_get_dummies.json",
+  "test_file": "generated_tests/pandas_get_dummies/mistralai-mistral-7b-instruct-free.py",
+  "target_qualified_name": "pandas.get_dummies",
+  "killed": 94,
+  "survived": 0,
+  "total_mutants": 94,
+  "mutation_score": 100.0
+}

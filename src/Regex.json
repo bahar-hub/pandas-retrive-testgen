@@ -1,0 +1,121 @@
+{
+  "provider": "pattern",
+  "profile_name": "Pattern Test 1",
+  "model_name": "",
+  "chunk_size": 3000,
+  "max_chunks": null,
+  "extraction_time": 0.0014979839324951172,
+  "timestamp": "2025-12-01T19:30:45.150258",
+  "functions": [
+    {
+      "name": "fib",
+      "parameters": [
+        {
+          "name": "n",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "None",
+      "description": "Extracted by regex",
+      "line_number": 48
+    },
+    {
+      "name": "login",
+      "parameters": [
+        {
+          "name": "user",
+          "type": "unknown"
+        },
+        {
+          "name": "pass",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 9
+    },
+    {
+      "name": "fetchProfile",
+      "parameters": [
+        {
+          "name": "id",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 10
+    },
+    {
+      "name": "getStats",
+      "parameters": [
+        {
+          "name": "range",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 44
+    },
+    {
+      "name": "analyze",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "unknown"
+        },
+        {
+          "name": "lang='fa'",
+          "type": "unknown"
+        }
+      ],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 47
+    },
+    {
+      "name": "Functions",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 8
+    },
+    {
+      "name": "compute",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 11
+    },
+    {
+      "name": "join",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 12
+    },
+    {
+      "name": "accept",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 17
+    },
+    {
+      "name": "length_of",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 45
+    },
+    {
+      "name": "Multiply",
+      "parameters": [],
+      "return_type": "unknown",
+      "description": "Extracted by regex",
+      "line_number": 49
+    }
+  ]
+}
