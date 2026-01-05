@@ -1,0 +1,10 @@
+{
+  "llm_name": "openrouter_qwen3-coder-free",
+  "spec_path": "/Users/bahar/MyFolder/Uni/project/pandas-retive-testGen/src/backend/artifacts/086bbdd314f045d482208b444653c365/base_project/spec.json",
+  "test_file": "generated_tests/openrouter_qwen3-coder-free.py",
+  "target_qualified_name": "pandas.core.reshape.concat.concat",
+  "killed": 31,
+  "survived": 0,
+  "total_mutants": 31,
+  "mutation_score": 100.0
+}

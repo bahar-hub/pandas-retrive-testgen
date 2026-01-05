@@ -1,0 +1,10 @@
+{
+  "llm_name": "openrouter_deepseek-r1t2-chimera-free",
+  "spec_path": "/Users/bahar/MyFolder/Uni/project/pandas-retive-testGen/src/backend/artifacts/84a7f55621274e278d9608452cbac96b/base_project/spec.json",
+  "test_file": "generated_tests/openrouter_deepseek-r1t2-chimera-free.py",
+  "target_qualified_name": "pandas.core.tools.datetimes.to_datetime",
+  "killed": 95,
+  "survived": 0,
+  "total_mutants": 95,
+  "mutation_score": 100.0
+}

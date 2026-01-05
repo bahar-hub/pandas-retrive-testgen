@@ -381,7 +381,8 @@ def run_pytest_and_get_failed_tests(
         - the pytest return code
         - the full combined stdout+stderr
     """
-    cmd = ["pytest", "-q", test_file]
+    import sys
+    cmd = [sys.executable, "-m", "pytest", "-q", str(test_file)]
 
     try:
         proc = subprocess.run(
